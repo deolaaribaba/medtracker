@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTracker</title>
+    <style>
+        body {
+            background-color:rgb(192, 180, 201);
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        h1 { color: darkmagenta; }
+        input { padding: 8px; margin: 4px; width: 200px;}
+        button { background: darkmagenta; color: white; padding: 10px 15px; border: none; border-radius: 6px;}
+        #medList p { background: whitesmoke; padding: 10px; border-left: 5px solid #7b1fa2; border-radius: 4px;} 
+    </style>
+</head>
+<body>
+    <h1>MedTracker:When Does Medication Run Out ?</h1>
+<label for="medName">medication Name:</label>
+<input type="text" id="medName" placeholder="e.g Amoxicillin">
+<br><br>
+
+<label for="totalpills">Total Pills in Bottle:</label>
+<input type="number" id="totalpills" placeholder="e.g. 30">
+<br><br>
+
+<label for="pillsPerDay">Pills Taken Per Day:</label>
+<input type="number" id="pillsPerDay" placeholder="e.g. 2">
+<br><br>
+
+<button id="calcBtn">Add medication to List</button>
+<br><br>
+<p id="result"></p>
+
+
+<h2>My Medication</h2>
+<div id="medList"></div>
+<script>
+// This array will store All medications
+var medicationList = JSON.parse(localStorage.getItem('meds')) || [];
+// show saved meds on load
+var listHTML = "";
+for (var i = 0; i <
+    medicationList.length; i++
+) {
+    var med = medicationList[i];
+    listHTML =listHTML + "<p style= 'color:" + med.color +"'>'" + med.message +"</p>";
+}
+document.getElementById("medList").innerHTML = listHTML;
+document.getElementById('calcBtn').onclick = function()  {
+    var medName = document.getElementById("medName"). value;
+    var totalpills = parseInt(document.getElementById("totalpills").value);
+    var pillsPerDay = parseInt(document.getElementById("pillsPerDay").value);
+
+    if (medName === "") {
+        alert("please enter medication name");
+        return;
+    }
+    if (pillsPerDay <= 0) {
+        alert("pills per day must be 1 or more");
+        return;
+    }
+    var daysLeft = Math.floor(totalpills/pillsPerDay);
+
+    var today = new Date();
+    var refillDate = new Date();
+    refillDate.setDate(today.getDate() + daysLeft);
+    var resultMessage = "You have " + daysLeft + " days of " +  medName + ". Refill by " + refillDate.toDateString();
+    var resultcolor = "black";
+
+    if (daysLeft <= 7)  {
+        resultMessage = "WARNING: Only " + daysLeft + " days of " + medName + " left. Refill by " + refillDate.toDateString();
+        resultcolor = "darkorange";
+    }
+    if (daysLeft <= 3)  {
+        resultMessage = "URGENT: Only " + daysLeft + " days of " + medName + " left. Refill by " + refillDate.toDateString();
+        resultcolor = "red";
+    }
+    var newMed = {
+        name: medName,
+        message: resultMessage,
+        color: resultcolor
+    };
+
+    medicationList.push(newMed);
+    localStorage.setItem('meds' , JSON.stringify(medicationList));
+    var listHTML = "";
+
+    for (var i =0; i <medicationList.length; i++)  {
+        var med = medicationList[i];
+        listHTML = listHTML + "<p style='color:" + med.color + "'>" + med.message + "</p";
+        }
+
+        document.getElementById("medList").innerHTML =listHTML;
+
+        document.getElementById("medName").value = "";
+        document.getElementById("totalpills").value = "";
+        document.getElementById("pillsPerDay").value = "";
+    };
+ 
+
+
+</script>
+</body>
+</html>
