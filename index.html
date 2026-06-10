@@ -3,106 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTracker</title>
+    <title>My Medtracker</title>
     <style>
         body {
-            background-color:rgb(192, 180, 201);
-            font-family: Arial;
+            background-color:teal; 
+            font-family: Arial,sans-serif;
+            margin: 0;
             padding: 20px;
+            color: #1f2937; /* dark gray text for contrast */
         }
 
-        h1 { color: darkmagenta; }
-        input { padding: 8px; margin: 4px; width: 200px;}
-        button { background: darkmagenta; color: white; padding: 10px 15px; border: none; border-radius: 6px;}
-        #medList p { background: whitesmoke; padding: 10px; border-left: 5px solid #7b1fa2; border-radius: 4px;} 
+        /* White card container - this fixes the "floaty" feeling */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: whitesmoke;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0,1);
+        }
+
+        h1 { color: #0f766e; 
+        text-align: center;
+        font-size: 28px;
+        font-weight: 600;
+        margin : 0 0 25px 0;
+
+        
+        }
+
+        label {
+            color: #134e4a;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 2px solid #ccfbf1;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #0f766e;
+            color:ghostwhite;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor:pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #134e4a; /* deep teal on hover */
+        }
+
+        .med-card {
+            background: #f0fdfa; /* Pale mint card against deep teal background */
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 4px solid #14b8a6;  /* brigt teal accent */
+        }
+
+        .urgent {
+            border-left: 4px solid #dc2626; /* red accent for urgent meds */
+        }
+
+        .taken-btn {
+            background: #0f766e ; /* Deep teal for "Mark Taken" */
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+
     </style>
 </head>
 <body>
-    <h1>MedTracker:When Does Medication Run Out ?</h1>
+    <div class="container">
+    <h1>My Medtracker</h1>
 <label for="medName">medication Name:</label>
 <input type="text" id="medName" placeholder="e.g Amoxicillin">
 <br><br>
 
-<label for="totalpills">Total Pills in Bottle:</label>
-<input type="number" id="totalpills" placeholder="e.g. 30">
+<label for="totalPills">Total Pills in Bottle:</label>
+<input type="number" id="totalPills" placeholder="e.g. 30">
 <br><br>
 
 <label for="pillsPerDay">Pills Taken Per Day:</label>
 <input type="number" id="pillsPerDay" placeholder="e.g. 2">
 <br><br>
 
-<button id="calcBtn">Add medication to List</button>
+<button onclick="addMedication()">Add medication to List</button>
 <br><br>
 <p id="result"></p>
 
 
 <h2>My Medication</h2>
+<div id="orderAlert" style="padding:10px; margin-bottom:15px;"></div>
 <div id="medList"></div>
-<script>
-// This array will store All medications
-var medicationList = JSON.parse(localStorage.getItem('meds')) || [];
-// show saved meds on load
-var listHTML = "";
-for (var i = 0; i <
-    medicationList.length; i++
-) {
-    var med = medicationList[i];
-    listHTML =listHTML + "<p style= 'color:" + med.color +"'>'" + med.message +"</p>";
-}
-document.getElementById("medList").innerHTML = listHTML;
-document.getElementById('calcBtn').onclick = function()  {
-    var medName = document.getElementById("medName"). value;
-    var totalpills = parseInt(document.getElementById("totalpills").value);
-    var pillsPerDay = parseInt(document.getElementById("pillsPerDay").value);
-
-    if (medName === "") {
-        alert("please enter medication name");
-        return;
-    }
-    if (pillsPerDay <= 0) {
-        alert("pills per day must be 1 or more");
-        return;
-    }
-    var daysLeft = Math.floor(totalpills/pillsPerDay);
-
-    var today = new Date();
-    var refillDate = new Date();
-    refillDate.setDate(today.getDate() + daysLeft);
-    var resultMessage = "You have " + daysLeft + " days of " +  medName + ". Refill by " + refillDate.toDateString();
-    var resultcolor = "black";
-
-    if (daysLeft <= 7)  {
-        resultMessage = "WARNING: Only " + daysLeft + " days of " + medName + " left. Refill by " + refillDate.toDateString();
-        resultcolor = "darkorange";
-    }
-    if (daysLeft <= 3)  {
-        resultMessage = "URGENT: Only " + daysLeft + " days of " + medName + " left. Refill by " + refillDate.toDateString();
-        resultcolor = "red";
-    }
-    var newMed = {
-        name: medName,
-        message: resultMessage,
-        color: resultcolor
-    };
-
-    medicationList.push(newMed);
-    localStorage.setItem('meds' , JSON.stringify(medicationList));
-    var listHTML = "";
-
-    for (var i =0; i <medicationList.length; i++)  {
-        var med = medicationList[i];
-        listHTML = listHTML + "<p style='color:" + med.color + "'>" + med.message + "</p";
-        }
-
-        document.getElementById("medList").innerHTML =listHTML;
-
-        document.getElementById("medName").value = "";
-        document.getElementById("totalpills").value = "";
-        document.getElementById("pillsPerDay").value = "";
-    };
+<h3>Today's Schedule</h3>
+<div id="todaySchedule"></div>
  
+    
+<script>
+    var medicationList = JSON.parse(localStorage.getItem('meds')) || [];
+    
+    function renderMeds() {
+        const medList = document.getElementById('medList');
+        if (!medList) return;
+        let html = '';
+        let orderHtml = '';
+const orderBox = document.getElementById('orderAlert');
+        for (let i = 0; i < medicationList.length; i++) {
+            const med = medicationList[i];
+            const daysLeft = Math.ceil(med.totalPills / med.pillsPerDay);
+            let barColor = '#2a9d8f';
+if (daysLeft <= 3) {
+  barColor = '#e63946';
+}
+if (daysLeft <= 3 && daysLeft > 0) {
+  console.log(`⚠️; ${med.medName} is low — ${daysLeft} days left`);
+  orderHtml += `<p style="color:#e63946; font-weight:bold; margin:5px 0;">⚠️ Order ${med.medName} — ${daysLeft} days left <button onclick="orderedMed(${i})" style="margin-left:10px; padding:3px 8px; font-size:12px; cursor:pointer;">Ordered</button></p>`;
+}
+            html += `<div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: ${barColor}; color: white;">
+                <strong>${med.medName}</strong> - ${med.pillsPerDay} per day
+                <button onclick="deleteMed(${i})" style="margin-left: 10px;">🗑️</button>
+                <div style="font-size: 12px; color: #666;">Refills in ${daysLeft} days Left</div>
+            </div>`;
+        }
+        if (orderBox) {
+  orderBox.innerHTML = orderHtml ? '<h3 style="margin:0 0 5px 0;">Medications to Order</h3>' + orderHtml : '';
+}
+        medList.innerHTML = html;
+    }
+   function deleteMed(i) {
+    const confirmDelete = confirm("Delete this medication? This can not be undone.");
+    if (confirmDelete) {
+        medicationList.splice(i, 1);
+        localStorage.setItem('meds', JSON.stringify(medicationList));
+        renderMeds()
+        renderToday()
+    }
+   }
+   function orderedMed(index) {
+  const amount = parseInt(prompt(`How many ${medicationList[index].medName} pills did you collect?`, "28"));
+  if (amount > 0) {
+    medicationList[index].totalPills += amount;
+    localStorage.setItem('meds', JSON.stringify(medicationList));
+    renderMeds();
+  }
+}
 
+    function renderToday() {
+        const box = document.getElementById('todaySchedule');
+        if (!box) return;
+        const today = new Date().toDateString();
+        const taken = JSON.parse(localStorage.getItem('taken-' + today)) || [];
+        let html = '';
+        for (let i = 0; i < medicationList.length; i++) {
+            const med = medicationList[i];
+            const isTaken = taken[i];
+            const status = isTaken? 'Taken ✓' : 'Mark Taken';
+            const color = isTaken? '#6B7280' : '#556b2f';
+            html += `<div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <strong>${med.medName}</strong> - ${med.pillsPerDay} per day
+                <button onclick="markTaken(${i})" style="background:${color}; color:white; padding:8px 16px; border:none; border-radius:6px; margin-left:10px; cursor:pointer;">
+                    ${status}
+                </button>
+            </div>`;
+        }
+        box.innerHTML = html;
+    }
+    
+    function markTaken(i) {
+  const today = new Date().toDateString();
+  const taken = JSON.parse(localStorage.getItem('taken-' + today)) || [];
 
+  // if not taken yet today, subtract pills
+  if (!taken[i]) {
+    medicationList[i].totalPills = medicationList[i].totalPills - medicationList[i].pillsPerDay;
+    if (medicationList[i].totalPills < 0) {
+      medicationList[i].totalPills = 0;
+    }
+  } else {
+    // if you un-click, add them back
+    medicationList[i].totalPills = medicationList[i].totalPills + medicationList[i].pillsPerDay;
+  }
+
+  // save the new pill count
+  localStorage.setItem('meds', JSON.stringify(medicationList));
+
+  // toggle taken status
+  taken[i] =!taken[i];
+  localStorage.setItem('taken-' + today, JSON.stringify(taken));
+
+  // redraw both sections
+  renderToday();
+  renderMeds();
+}
+    
+    function addMedication() {
+        const name = document.getElementById('medName').value;
+        const total = Number(document.getElementById('totalPills').value);
+        const perDay = Number(document.getElementById('pillsPerDay').value);
+        if (!name ||!total ||!perDay) {
+            alert('Please fill all fields');
+            return;
+        }
+        medicationList.push({
+            medName: name,
+            totalPills: Number(total),
+            pillsPerDay: Number(perDay)
+        });
+        localStorage.setItem('meds', JSON.stringify(medicationList));
+        document.getElementById('medName').value = '';
+        document.getElementById('totalPills').value = '';
+        document.getElementById('pillsPerDay').value = '';
+        renderMeds();
+        renderToday();
+    }
+    
+    window.onload = function() {
+        renderMeds();
+        renderToday();
+    };
 </script>
 </body>
 </html>
